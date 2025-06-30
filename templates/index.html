@@ -13,7 +13,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
         }
         .container {
             background-color: #ffffff;
@@ -23,6 +23,16 @@
             width: 100%;
             max-width: 500px;
             text-align: center;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+            text-align: left;
         }
         h1 {
             color: #333;
@@ -85,6 +95,16 @@
 </head>
 <body>
     <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">
+                    {% for message in messages %}
+                        <span>{{ message }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         <h1>Excel 文件转 PDF</h1>
         <p>请选择一个 .xlsx 或 .xls 文件进行上传和转换。</p>
         <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
@@ -103,10 +123,16 @@
         const form = document.getElementById('upload-form');
         const spinner = document.getElementById('spinner');
 
+        // 在页面显示时（包括后退/前进）重置状态
+        window.addEventListener('pageshow', () => {
+            spinner.style.display = 'none';
+            fileInput.value = ''; // 清空文件选择，以便可以重新选择相同的文件
+            fileNameDisplay.textContent = '未选择文件';
+        });
+
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
                 fileNameDisplay.textContent = fileInput.files[0].name;
-                // 自动提交表单
                 spinner.style.display = 'block';
                 form.submit();
             } else {
